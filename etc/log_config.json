@@ -1,0 +1,13 @@
+{
+  "log_dir": "../logs",
+  "log_level": "DEBUG",
+  "log_format": "%(asctime)s %(levelname)s %(filename)s(%(process)s) %(module)s[%(funcName)s:%(lineno)s] %(msg)s",
+  "log_handler": "RotatingHandler",
+  "RotatingHandler": {
+    "mode": "a",
+    "max_bytes": 10485760,
+    "backup_count": 10,
+    "encoding": "utf-8",
+    "delay": false
+  }
+}

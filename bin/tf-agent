@@ -1,9 +1,129 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+
+import os
+import sys
+import traceback
+
+cur_dir = os.path.dirname(os.path.relpath(__file__))
+sys.path.insert(0, os.path.join(cur_dir, '../'))
+
+import agent.cli as cli
+from common.cli import *
+
+COMMANDS = {}
+
+
+def load_modules():
+    global COMMANDS
+
+    for name in cli.__all__:
+        module = 'agent.cli.{}'.format(name)
+        __import__(module)
+        COMMANDS[name] = getattr(cli, name)
+
+
+def print_help(*args):
+    if len(args) == 0:
+        print('usage: tf-agent [command] [subcommand] <args>')
+        print('tf-agent help [command]')
+        print('tf-agent help [command] [subcommand]')
+        print('list of commands')
+        print('\t' + ', '.join(COMMANDS.keys()))
+    elif len(args) == 1:
+        if args[0] not in COMMANDS:
+            print('ERROR: unknown command {}'.format(args[0]))
+        else:
+            cmd = COMMANDS[args[0]]
+            members = [getattr(cmd, name) for name in dir(cmd)]
+            wrappers = [wrapper for wrapper in members if isinstance(wrapper, CommandWrapper)]
+            infos = [('\t' + wrapper.name, wrapper.doc) for wrapper in wrappers]
+
+            print('usage: tf-agent {} [command] <args>'.format(args[0]))
+            print('list of commands')
+            [print(info[0]) for info in infos]
+    elif len(args) >= 2:
+        if args[0] not in COMMANDS:
+            print('ERROR: unknown command {}'.format(args[0]))
+        else:
+            cmd = COMMANDS[args[0]]
+            sub_cmd = args[1]
+            if hasattr(cmd, sub_cmd) and isinstance(getattr(cmd, sub_cmd), CommandWrapper):
+                wrapper = getattr(cmd, sub_cmd)
+                wrapper.parser.print_help()
+            elif sub_cmd == '--help':
+                print_help(sub_cmd)
+            else:
+                print('ERROR: unknown command {} {}'.format(cmd, sub_cmd))
+                print_help(cmd)
+    else:
+        print_help()
+
+
+def run_cmd(args):
+    def _check(*args):
+        try:
+            if len(args) == 1 or args[1] == '--help':
+                return True
+            return False
+        except KeyError:
+            return True
+
+    if len(args) == 0:
+        print_help(args)
+    elif args[0] == 'help':
+        print_help(*args[1:])
+    elif args[0] == 'interpreter':
+        run_interpreter()
+    elif _check(*args):
+        print_help(*args)
+    elif args[0] in COMMANDS:
+        cmd = COMMANDS[args[0]]
+        funcname = args[1]
+        if hasattr(cmd, funcname) and isinstance(getattr(cmd, funcname), CommandWrapper):
+            wrapper = getattr(cmd, funcname)
+            params = args[2:]
+            wrapper.call(params)
+        else:
+            print('ERROR: unknown command {} {}'.format(args[0], args[1]))
+            print_help(args[0])
+    else:
+        print('ERROR: unknown command {}'.format(args[0]))
+        print_help()
+
+
+def run_interpreter():
+    import readline
+    readline.set_completer_delims(' \t\n;')
+    readline.parse_and_bind('tab: complete')
+
+    while True:
+        try:
+            line = input('[TF-AGENT] ')
+            if not line:
+                continue
+
+            argv = line.split()
+            run_cmd(argv)
+        except EOFError:
+            print('exit')
+            break
+        except KeyboardInterrupt:
+            print('^C')
+            break
+        except BaseException:
+            traceback.print_exc()
+
 
 def main():
-    pass
-
+    load_modules()
+    if len(sys.argv) < 2:
+        print_help()
+    else:
+        run_cmd(sys.argv[1:])
 
 if __name__ == '__main__':
     main()

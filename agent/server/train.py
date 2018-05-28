@@ -5,4 +5,9 @@ from __future__ import division
 from __future__ import unicode_literals
 
 
-__all__ = ['check']
+from . import *
+from common.config import *
+
+
+# app.route('/v1/train', methods=['GET'])
+# def list():

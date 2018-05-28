@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+
+import os
+import sys
+
+cur_dir = os.path.dirname(os.path.relpath(__file__))
+sys.path.insert(0, os.path.join(cur_dir, '../'))
+
+import agent.server as server
+from common.config import *
+from common.log import *
+
+
+def main(host, port, debug=False):
+    print(server.app.logger)
+    server.app.run(host=host, port=port, debug=debug)
+
+
+if __name__ == '__main__':
+    config = get_config()
+    host = config[AGENT_SERVER_HOST]
+    port = config[AGENT_SERVER_PORT]
+    debug = config[DEBUG]
+    main(host, port, debug=debug)
