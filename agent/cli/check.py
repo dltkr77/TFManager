@@ -23,7 +23,7 @@ def agent(args):
 
     try:
         response = requests.get(url)
-        print(response.status_code, response.json(), response.elapsed)
+        print(response.status_code, response.text, response.elapsed)
     except requests.exceptions.ConnectionError:
         print('Agent is not running')
 
@@ -39,6 +39,6 @@ def manager(args):
 
     try:
         response = requests.get(url)
-        print(response.status_code, response.json(), response.elapsed)
+        print(response.status_code, response.text, response.elapsed)
     except requests.exceptions.ConnectionError:
         print('Manager is not running')

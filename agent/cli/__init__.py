@@ -5,4 +5,4 @@ from __future__ import division
 from __future__ import unicode_literals
 
 
-__all__ = ['check']
+__all__ = ['check', 'model']

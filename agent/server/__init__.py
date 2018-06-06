@@ -20,6 +20,6 @@ logger = get_logger('tf-agent-server')
 CORS(app)
 
 
-__SERVICES__ = ['check', 'train']
+__SERVICES__ = ['check', 'train', 'model']
 for service in __SERVICES__:
     __import__('agent.server.' + service)

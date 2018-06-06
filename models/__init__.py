@@ -2,7 +2,7 @@
 
 
 class Model(object):
-    def __init__(self, config):
+    def __init__(self, config: object) -> object:
         self.config = config
 
     def build_graph(self, input_tensor, label_tensor, **kwargs):

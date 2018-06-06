@@ -15,7 +15,7 @@ class LSTMRecommender(Model):
     LSTM for recommendation system
     """
     def __init__(self, config):
-        super().__init__(config)
+        Model.__init__(self, config)
 
     def build_graph(self, input_tensor, label_tensor, concat_tensor=None):
         """

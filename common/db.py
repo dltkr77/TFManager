@@ -11,6 +11,7 @@ from common.log import get_logger
 
 g_databases = {}
 
+# TODO: integration to tf-agent or tf-manager logs
 LOG = get_logger(__name__)
 
 
@@ -19,8 +20,13 @@ def get_connection(path, timeout=0.5):
     if path not in g_databases:
         conn = sqlite3.connect(path, timeout=timeout)
         g_databases[path] = conn
-
     return g_databases[path]
+
+
+def close_connection(path):
+    global g_databases
+    if path in g_databases:
+        g_databases.pop(path).close()
 
 
 def create(conn, sql):
@@ -58,7 +64,7 @@ def insert(conn, sql):
         cur = conn.cursor()
         cur.execute(sql)
         conn.commit()
-        return cur.rowcount() > 0
+        return cur.rowcount > 0
     except BaseException as e:
         LOG.error(str(e))
         return False
@@ -72,7 +78,23 @@ def update(conn, sql):
     try:
         cur = conn.cursor()
         cur.execute(sql)
-        return cur.rowcount() > 0
+        conn.commit()
+        return cur.rowcount > 0
+    except BaseException as e:
+        LOG.error(str(e))
+        return False
+    finally:
+        if cur:
+            cur.close()
+
+
+def delete(conn, sql):
+    cur = None
+    try:
+        cur = conn.cursor()
+        cur.execute(sql)
+        conn.commit()
+        return cur.rowcount > 0
     except BaseException as e:
         LOG.error(str(e))
         return False
